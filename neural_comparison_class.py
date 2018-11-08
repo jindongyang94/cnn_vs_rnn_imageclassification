@@ -23,6 +23,7 @@ from keras.optimizers import RMSprop
 from keras import initializers
 from keras import backend as K
 from sklearn.metrics import roc_auc_score
+import matplotlib.pyplot as plt
 
 
 class NeuralNetworkClassifier(object):
@@ -33,6 +34,8 @@ class NeuralNetworkClassifier(object):
     """
 
     def __init__(self, chosen_model='cnn', data_choice='fashion'):
+        self.history = None
+
         # Internal Processes Trigger
         self._data_loaded = False
         self._data_preprocessed = False
@@ -66,7 +69,7 @@ class NeuralNetworkClassifier(object):
         self._data_loaded = True
 
     def __load_data_flowers(self):
-        data_dir = "./datasets/flowers/"
+        data_dir = "../datasets/flowers/"
         folders = os.listdir(data_dir)
 
         image_names = []
@@ -174,7 +177,7 @@ class NeuralNetworkClassifier(object):
 
     def __create_model_cnn(self):
         self.batch_size = 128
-        self.n_epochs = 12
+        self.n_epochs = 1
 
         self.model = Sequential()
         self.model.add(Conv2D(32, kernel_size=(3, 3),
@@ -197,7 +200,7 @@ class NeuralNetworkClassifier(object):
     def __create_model_rnn(self):
         self.batch_size = 32  # Size of each batch
         # self.n_epochs = 200
-        self.n_epochs = 12
+        self.n_epochs = 1
         hidden_units = 100
         # learning_rate = 1e-6
         # clip_norm = 1.0
@@ -222,8 +225,8 @@ class NeuralNetworkClassifier(object):
             self.__preprocessing()
         self.__create_model()
 
-        self.model.fit(self.x_train, self.y_train,
-                       batch_size=self.batch_size, epochs=self.n_epochs, verbose=1)
+        self.history = self.model.fit(self.x_train, self.y_train,
+                                      batch_size=self.batch_size, epochs=self.n_epochs, verbose=1)
         # validation_data = (self.x_val, self.y_val)
         self._trained = True
 
@@ -253,12 +256,57 @@ if __name__ == "__main__":
     # cnn_classifier = NeuralNetworkClassifier(chosen_model='cnn', data_choice='flowers')
     # cnn_classifier.train(save_model=True)
     # cnn_metrics = cnn_classifier.evaluate()
+    models = ['cnn', 'rnn']
+    metrics ={}
+    for model in models:
+        classifier = NeuralNetworkClassifier(chosen_model=model, data_choice='flowers')
+        classifier.train(save_model=False)
+        metrics[model] = classifier.evaluate()
 
-    rnn_classifier = NeuralNetworkClassifier(chosen_model='rnn', data_choice='flowers')
-    rnn_classifier.train(save_model=True)
-    rnn_metrics = rnn_classifier.evaluate()
+    print(metrics)
 
-    # print('CNN Classifier Metrics')
-    # print(cnn_metrics)
-    print('RNN Classifier Metrics')
-    print(rnn_metrics)
+    # rnn_classifier = NeuralNetworkClassifier(chosen_model='cnn', data_choice='flowers')
+    # rnn_classifier.train(save_model=True)
+    # history = rnn_classifier.history
+    # rnn_metrics = rnn_classifier.evaluate()
+    #
+    # # print('CNN Classifier Metrics')
+    # # print(cnn_metrics)
+    # print('RNN Classifier Metrics')
+    # print(rnn_metrics)
+
+    # print(history.history.keys())
+    # plt.plot(history.history['acc'])
+    # plt.plot(history.history['val_acc'])
+    # plt.title('model accuracy')
+    # plt.ylabel('accuracy')
+    # plt.xlabel('epoch')
+    # plt.legend(['train', 'test'], loc='upper left')
+    # plt.show()
+    # plt.savefig('accuracy_history.png')
+    # plt.clf()
+
+    # If you want to do it for another classifier just initialize another classifier
+    # rnn_classifier = NeuralNetworkClassifier(chosen_model='rnn', data_choice='fashion')
+    # rnn_classifier.train(save_model=True)
+    # history = rnn_classifier.history
+    # rnn_metrics = rnn_classifier.evaluate()
+    #
+    # # print('CNN Classifier Metrics')
+    # # print(cnn_metrics)
+    # print('RNN Classifier Metrics')
+    # print(rnn_metrics)
+    #
+    # print(history.keys())
+    # print(history.history.keys())
+    # plt.plot(history.history['acc'])
+    # plt.plot(history.history['val_acc'])
+    # plt.title('model accuracy')
+    # plt.ylabel('accuracy')
+    # plt.xlabel('epoch')
+    # plt.legend(['train', 'test'], loc='upper left')
+    # plt.savefig('accuracy_history.png')
+    # plt.clf()
+
+
+
